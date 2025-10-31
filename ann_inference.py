@@ -338,7 +338,11 @@ if __name__ == "__main__":
             help="The seed to use during inference, negative value means no seed",
         )
         args = parser.parse_args()
+        inference_task_file = os.path.join(args.output,"inference_complete.txt")
 
+        if os.path.exists(inference_task_file):
+            print("Inference already completed. Exiting.")
+            exit(0)
         # load the model
         tokenizer = AutoTokenizer.from_pretrained(args.model_path)
         model = AutoModelForCausalLM.from_pretrained(
@@ -375,8 +379,7 @@ if __name__ == "__main__":
 
             # preprocess the point cloud to tensor features
             input_pcd = preprocess_point_cloud(points, colors, grid_size, num_bins)
-            print("generating layout")
-            print(input_pcd.shape, input_pcd)
+
             # generate the layout
             
             layout = generate_layout(
@@ -404,6 +407,9 @@ if __name__ == "__main__":
             os.makedirs(args.output, exist_ok=True)
             with open(os.path.join(args.output, output_filename), "w") as f:
                 f.write(pred_language_string)
+            with open(inference_task_file, "w") as f:
+                f.write("Inference completed successfully.")
+
     except Exception as e:
         print("An error occurred during processing:")
         print(str(e))
